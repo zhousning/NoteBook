@@ -1,4 +1,5 @@
-工作经历
+# 工作经历
+
 2015年7月——至今 吉林市美联科技有限公司
   基于Kindeditor开发“快论文”（www.kuai65.com）智能编辑器，完全负责前端开发工作
   基于Ionic+AngularJs开发“快论文App”
@@ -13,11 +14,28 @@
 2013年8月——2014年4月  国网吉林供电公司
   参与开发电力安全规程多媒体网校系统，使用java+spring+Struts+hibernate
 
+
+
+工作经历简述：
+
+我所在的公司是一家创业公司，研发团队3人，团队带头人曾任职于阿里巴巴搜索引擎部门。团队先后开发了家教呢家教O2O平台、家教呢微信端、快论文论文排版平台、快论文app、快论文微信端等产品，因为团队研发人员有限，我在团队中既做产品研发，也做设计。在不断的设计、开发过程中形成了产品的理念，
+
+从事商业项目开发2年
+
+产品的理念
+
 开源项目和作品
 
 技能清单
-  精通：Ruby on Rails框架、HTML5、CSS3、JavaScript、Bootstrap、Jquery、Kindeditor
-  熟悉：JAVA、Spring、Hibernate、Struts、ionic、AngularJS、GitHub、SVN
+  熟悉：Ruby on Rails框架、Kindeditor
+
+​	      HTML5、CSS3、JavaScript、jQuery、Bootstrap
+
+​	      JAVA、Spring、Hibernate、Struts
+
+​	      ionic、AngularJS
+
+​	      GitHub、SVN
   了解：Bower/Gulp/SaSS/LeSS/PhoneGap
 
 
@@ -26,9 +44,11 @@
 
 系统设计：
 
-​	用户交互、系统UI
+​	产品设计、用户交互、系统UI
 
 系统研发：
+
+​	Kindeditor编辑器二次开发：
 
 ​	1.按后台数据协议，编辑器保留需要标签和属性，清除非需要标签和属性
 
@@ -48,18 +68,15 @@
 
 ​	9.二次开发kineditor图片和表格插件，按需要设置功能
 
-总结：我所做的所有工作就是要保证用户在编辑区内无论进行任何操作，都能够按格式规则和数据结构要求生成需要内容。示例：
+总结：我所做的所有工作就是要保证用户在编辑区内无论进行任何操作，都能够按格式规则和数据结构要求生成需要内容，保证数据的干净整洁。示例：
 
+```html
 <h1 data-type="title-one">一级标题</h1>
-
 <h2 data-type="title-two">二级标题</h2>
-
 <h3 data-type="title-one">三级<sup>[1,3,5]</sup]标题</h3>
-
 <div data-type="thesis-image">
-
-​	<div data-type="thesis-image-tool">tool content</div>
-
-​	<img src="example.jgp"/>
-
+	<div data-type="thesis-image-tool">tool content</div>
+  	<img src="example.jpg"/>
 </div>
+
+```
