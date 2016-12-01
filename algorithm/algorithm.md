@@ -38,3 +38,21 @@ function bubbleSort(data){
 
 ![basic+bubble](bubblesort.png)
 
+# 递归算法
+
+先将正常的流程写出来，再将特殊条件加进去
+
+```javascript
+function extendCopy(p, c) {
+  var c = c || {};
+  for(var i in p) {
+    if (typeOf p[i] === 'object') {
+      c[i] = (p[i].constructor == Array) ? [] : {};
+      extendCopy(p[i], c[i]);
+    } else {
+      c[i] = p[i];
+    }
+  }
+  return c;
+}
+```
