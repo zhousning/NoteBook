@@ -38,7 +38,6 @@
   优先级为:
      !important >  id > class > tag
       important 比 内联优先级高
-
   ```
 
 - CSS3新增伪类有那些？
@@ -78,14 +77,14 @@
       设置层的外边距
 
      .div {
-          width:500px ; height:300px;//高度可以不设
+          width:500px ; 
+          height:300px;//高度可以不设
           margin: -150px 0 0 -250px;
           position:relative;         //相对定位
           background-color:pink;     //方便看效果
           left:50%;
           top:50%;
      }
-
     ```
 
   - 让绝对定位的div居中
@@ -99,19 +98,17 @@
       left: 0;
       bottom: 0;
       right: 0;
-
     ```
 
 - display有哪些值？说明他们的作用。
 
   ```
     block         象块类型元素一样显示。
-    none          缺省值。象行内元素类型一样显示。
+    none          缺省值。象行内元素类型一样显示。隐藏
     inline-block  象行内元素一样显示，但其内容象块类型元素一样显示。
     list-item     象块类型元素一样显示，并添加样式列表标记。
     table         此元素会作为块级表格来显示
     inherit       规定应该从父元素继承 display 属性的值
-
   ```
 
 - position的值relative和absolute定位原点是？
@@ -143,7 +140,6 @@
     旋转          （transform）
     增加了旋转,缩放,定位,倾斜,动画，多背景
     transform:\scale(0.85,0.90)\ translate(0px,-30px)\ skew(-9deg,0deg)\Animation:
-
   ```
 
 - 请解释一下CSS3的Flexbox（弹性盒布局模型）,以及适用场景？
