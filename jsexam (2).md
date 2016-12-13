@@ -1,12 +1,57 @@
 - 数组和对象有哪些原生方法，列举一下？
 
+  http://www.cnblogs.com/tianguook/archive/2010/09/30/1839648.html
+
+  排序sort、reverse 返回数组地址
+
+  遍历：forEach
+
+  插入：push、unshift、arrayObj.splice(insertPos,0,[item1[, item2[, . . . [,itemN]]]]);
+
+  删除：pop、shift、arrayObj.splice(deletePos,deleteCount);
+
+  截取：arrayObj.slice(start, [end]); //以数组的形式返回数组的一部分，注意不包括 end 对应的元素，如果省略 end 将复制 start 之后的所有元素
+
+  拼接：arrayObj.concat([item1[, item2[, . . . [,itemN]]]]); //将多个数组（也可以是字符串，或者是数组和字符串的混合）连接为一个数组，返回连接好的新的数组
+
+  复制：arrayObj.slice(0); //返回数组的拷贝数组，注意是一个新的数组，不是指向
+
+  ​	    arrayObj.concat(); //返回数组的拷贝数组，注意是一个新的数组，不是指向
+
+  字符串化；arrayObj.join(separator); //返回字符串，这个字符串将数组的每一个元素值连接在一起，中间用 separator 	    隔开。toLocaleString 、toString 、valueOf：可以看作是join的特殊用法，不常用
+
 - JS 怎么实现一个类。怎么实例化这个类
 
 - JavaScript中的作用域与变量声明提升？
 
-- 如何编写高性能的Javascript？
+  http://blog.csdn.net/yueguanghaidao/article/details/9568071
 
-- 那些操作会造成内存泄漏？
+  ​	Javascript压根没有块级作用域，而是函数作用域.所谓函数作用域就是说：变量在声明它们的函数体以及这个函数体嵌套的任意函数体内都是有定义的。
+
+  ​	变量分为全局变量和局部变量，全局变量在任何位置都有效，局部变量只在当前函数范围内有效,js当中没有块级作用域，在块中定义的变量在当前作用域的其他地方一样可以使用。
+
+  ​	显式声明的变量是在预编译时就已经编译到调用对象中了，隐式声明变量在解释时才被定义为全局变量
+
+  JavaScript引擎在执行的时候，会把所有变量的声明都提升到**当前作用域**的最前面。
+
+  **javascript是没有块级作用域的**。**函数是JavaScript中唯一拥有自身作用域的结构。**当前作用域内的声明都会提升到作用域的最前面，包括变量和函数的声明
+
+  ```javascript
+  (function(){
+    var a = "1";
+    var f = function(){};
+    var b = "2";
+    var c = "3";
+  })();
+  ```
+
+  ​	
+
+  with语句主要用来临时扩展作用域链，将语句中的对象添加到作用域的头部。
+
+  ​	备注：声明宣称一个名字的存在，定义则为这个名字分配存储空间，而初始化则是为名字分配的存储空间赋初值。因为javascript为动态语言，其变量并没有固定的类型，其存储空间大小会随初始化与赋值而变化，所以其变量的“定义”就不像传统的静态语言一样了，其定义显得无关紧要。
+
+- 如何编写高性能的Javascript？
 
 - JQuery的源码看过吗？能不能简单概况一下它的实现原理？
 
@@ -39,8 +84,6 @@
    提供了一些常用的界面元素，诸如对话框、拖动行为、改变大小行为等等
   ```
 
-- JQuery的源码看过吗？能不能简单说一下它的实现原理？
-
 - jquery 中如何将数组转化为json字符串，然后再转化回来？
 
 jQuery中没有提供这个功能，所以你需要先编写两个jQuery的扩展：
@@ -56,10 +99,7 @@ jQuery中没有提供这个功能，所以你需要先编写两个jQuery的扩�
 
     然后调用：
     $("").stringifyArray(array)
-
 ```
-
-- jQuery和Zepto的区别？各自的使用场景？
 
 - 针对 jQuery 的优化方法？
 
@@ -72,10 +112,7 @@ jQuery中没有提供这个功能，所以你需要先编写两个jQuery的扩�
   *for (var i = size; i < arr.length; i++) {}
    for 循环每一次循环都查找了数组 (arr) 的.length 属性，在开始循环的时候设置一个变量来存储这个数字，可以让循环跑得更快：
    for (var i = size, length = arr.length; i < length; i++) {}
-
   ```
-
-- Zepto的点透问题如何解决？
 
 - jQueryUI如何自定义组件?
 
@@ -85,7 +122,6 @@ jQuery中没有提供这个功能，所以你需要先编写两个jQuery的扩�
 
   ```
   通过判断Global对象是否为window，如果不为window，当前脚本没有运行在浏览器中
-
   ```
 
 - 移动端最小触控区域是多大？
@@ -110,14 +146,9 @@ jQuery中没有提供这个功能，所以你需要先编写两个jQuery的扩�
 
   setTimeout 的第一个参数使用字符串而非函数的话，会引发内存泄漏。
   闭包、控制台日志、循环（在两个对象彼此引用且彼此保留时，就会产生一个循环）
-
   ```
 
 - JQuery一个对象可以同时绑定多个事件，这是如何实现的？
-
-- Node.js的适用场景？
-
-- (如果会用node)知道route, middleware, cluster, nodemon, pm2, server-side rendering么?
 
 - 解释一下 Backbone 的 MVC 实现方式？
 
@@ -128,10 +159,6 @@ jQuery中没有提供这个功能，所以你需要先编写两个jQuery的扩�
 - 如何测试前端代码么? 知道BDD, TDD, Unit Test么? 知道怎么测试你的前端工程么(mocha, sinon, jasmin, qUnit..)?
 
 - 前端templating(Mustache, underscore, handlebars)是干嘛的, 怎么用?
-
-- 简述一下 Handlebars 的基本用法？
-
-- 简述一下 Handlerbars 的对模板的基本处理流程， 如何编译的？如何缓存的？
 
 - 用js实现千位分隔符?(来源：[前端农民工](http://div.io/topic/744)，提示：正则+replace)
 
@@ -166,7 +193,6 @@ jQuery中没有提供这个功能，所以你需要先编写两个jQuery的扩�
   例如，geolocation（地理位置）polyfill 可以在 navigator 对象上添加全局的 geolocation 对象，还能添加 getCurrentPosition 函数以及“坐标”回调对象，
   所有这些都是 W3C 地理位置 API 定义的对象和函数。因为 polyfill 模拟标准 API，所以能够以一种面向所有浏览器未来的方式针对这些 API 进行开发，
   一旦对这些 API 的支持变成绝对大多数，则可以方便地去掉 polyfill，无需做任何额外工作。
-
   ```
 
 - 做的项目中，有没有用过或自己实现一些 polyfill 方案（兼容性处理方案）？
