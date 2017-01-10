@@ -1,8 +1,363 @@
 # 浏览器
 
+## BOM
+
+### window
+
+表示浏览器窗口以及页面可见区域，同时它还是ECMAScript中的Global对象，，所有全局变量和函数都是它的属性，且所有原生构造函数及其他函数也都存在于它的命名空间下。
+
+location、navigator、screen、history
+
+### 全局作用域
+
+所有在全局作用域中声明的变量/函数都会变成window对象的属性和方法。
+
+全局变量不能通过delete删除，而直接定义在window对象上的属性可以
+
+```javascript
+var age = 12；
+window.color = “red”；
+
+delete window.age IE<9出错,其他浏览器返回false
+delete window.color E<9出错,其他浏览器返回true
+```
+
+访问未声明的变量会抛出错误，通过查询window对象，可以知道某个可能未声明的变量是否存在
+
+```javascript
+var newval = oldValue；	//oldValue未定义，出错
+var newval = window.oldValue； //undefined
+```
+
+### 窗口关系及框架
+
+每个框架都拥有自己的window对象，并且保存在frames集合中，通过索引或框架名称来访问相应的window对象。每个window对象都有一个name属性，其中包含框架的名称。
+
+```javascript
+<frameset>
+  <frame src name="topFrame">
+  <frameset>
+  	<frame src name="leftFrame">
+    <frame src name="rightFrame">
+  </frameset>
+</frameset>
+```
+
+​	可通过window.frames[0]或window.frames["topFrame"]引用上方框架，最好用top.frames[0]。top始终指向最外层的框架即浏览器窗口。使用它可以确保在一个框架中正确访问另一个框架。而window对象指向的都是那个框架的特定实例，而非最高层的框架。
+
+​	与top相对应的另一个window对象是parent。parent始终指向当前框架的直接上层框架。某些情况下parent有可能等于top，在没有框架的情况下，parent一点等于top（此时它们都等于window)
+
+​	parent指包含当前框架的框架，如果是frame包含则指的就是这个frame，如果是浏览器包含就是指浏览器
+
+### 窗口大小
+
+innerWidth
+
+innerHeight
+
+outerWidth
+
+outerHeight
+
+## 客户端检测
+
+#### 能力检测
+
+先检测最常用特性以保证代码最优化
+
+##### 更可靠的能力检测
+
+检测某个属性是否存在并不能确定对象是否支持排序，因为任何包含sort属性的对象也会返回true   {sort: true};
+
+```javascript
+function isSortable(object){
+  return  !object.sort";
+}
+```
+
+更好的方式是检测sort是不是一个函数
+
+```javascript
+function isSortable(object){
+  return typeof object.sort == "function";
+}
+```
+
+##### typeof行为不标准
+
+例一：宿主对象没有义务让typeof返回合理的值
+
+​	大多数浏览器检测typeof  document.createElement IE9之后返回function，IE8之前返回"object",DOM是宿主对象，IE8及更早版本中的宿主对象是通过COM而非JSscript实现的。
+
+例二:ActiveX对象（只有IE支持）
+
+```javascript
+var xhr = new ActiveXObject("Microsoft.XMLHttp");
+if (xhr.open){ //直接把函数作为属性访问会出错
+  XXXX
+}
+```
+
+typeof xhr.open返回“unknown”
+
+解决方案：在浏览器环境下测试任何对象的某个特性是否存在，使用：
+
+```javascript
+function isHostMethod(object, property){
+  var t = typeof object[property];
+  return t == "function" || (!!(t == "object" && object[property])) ||
+    	t == "unknown";
+}
+因为typeof null也是object，所有要检测object[property]是否存在
+!!保证返回的boolean类型
+```
+
+##### 能力检测不是浏览器检测
+
+​	不能通过检测某个能力存在与否就来确定是哪一个浏览器。在实际开发中应将能力检测作为确定下一步解决方案的一句，而不是用它来判断用户使用的是什么浏览器。
+
+如果应用程序需要使用某些特定的浏览器特性，最好一次性检测所有相关特性，而不是分别检测。
+
+```javascript
+var hasDom1 = !!(document.getElementById && document.createElement && document.getElementByTagName);;
+```
+
+#### 怪癖检测
+
+​	识别浏览器的特殊行为。通过运行一小段代码，识别浏览器存在什么缺陷，以确定某一特性不能正常工作。
+
+例：IE8之前：如果某个实例属性与某个原型属性名同名，则该实例属性将不会出现在for—in循环当中
+
+Safari3以前会枚举被隐藏的属性
+
+#### 用户代理检测
+
+优先级在能力检测和怪癖检测之后
+
+五大呈现引擎：IE、Gecko、WebKit、KHTML、Opera
+
+![useragent](assets/useragent.gif)
+
+```javascript
+var client = function() {
+  var engint = {
+    ie: 0,
+    gecko: 0,
+    webkit: 0,
+    khtml: 0,
+    opera: 0,
+    
+    ver: null
+  };
+  return {
+    engine: engine
+  }
+}();
+```
+
+要正确识别呈现引擎，关键是检测顺序要正确。如果检测顺序不对，很可能导致检测结果不正确。
+
+​	第一步就是识别opera，因为它的用户代理字符串可能完全模仿其他浏览器。我们不相信Opera，是因为任何情况下其用户代理字符串都不会将自己标识为Opera。
+
+```javascript
+if (window.opera) {
+  engine.ver = window.opera.version();
+  engine.opera = parseFloat(engine.ver);
+}
+```
+
+​	第二位是WebKit，其用户代理字符串包含“Gecko”和“KHTML"，其"AppleWebKit"是独一无二的
+
+```javascript
+var ua = navigator.userAgent;
+
+if (window.opera) {
+  engine.ver = window.opera.version();
+  engine.opera = parseFloat(engine.ver);
+} else if (/AppleWebKit\/(\S+)/.test(ua)){	//AppleWebKit/536.5
+  engint.ver = RegExp.$1;
+  engine.webkit = parseFloat(engine.ver);
+}
+```
+
+​	第三位是KTHML，KTHML用户代理字符串包含“Gecko”，其版本号与WebKit的版本号在用户代理字符串格式中差不错。Konqueror3.1及更早版本不包含KTHML版本，故而使用Konqueror的版本代替。
+
+```javascript
+var ua = navigator.userAgent;
+
+if (window.opera) {
+  engine.ver = window.opera.version();
+  engine.opera = parseFloat(engine.ver);
+} else if (/AppleWebKit\/(\S+)/.test(ua)){
+  engint.ver = RegExp.$1;
+  engine.webkit = parseFloat(engine.ver);
+} else if (/KHTML\/(\S+)/.test(ua) || /Konqueror\/([^;]+)/.test(ua)) {	//(KHTML, like Gecko)
+  engine.ver = RegExp.$1;
+  engine.khtml = parseFloat(engine.ver);
+}
+```
+
+​	第四位Gecko，Gecko的版本号不会出现在字符串“Gecko”后面，而是在“rv:"之后
+
+```javascript
+var ua = navigator.userAgent;
+
+if (window.opera) {
+  engine.ver = window.opera.version();
+  engine.opera = parseFloat(engine.ver);
+} else if (/AppleWebKit\/(\S+)/.test(ua)){
+  engint.ver = RegExp.$1;
+  engine.webkit = parseFloat(engine.ver);
+} else if (/KHTML\/(\S+)/.test(ua) || /Konqueror\/([^;]+)/.test(ua)) {
+  engine.ver = RegExp.$1;
+  engine.khtml = parseFloat(engine.ver);
+} else if (/rv:([^\)]+)\) Gecko\/\d(8)/.test(ua)) {	//  rv:24.0) Gecko/20100101
+  engine.ver = RegExp.$1;
+  engine.gecko = parseFloat(engine.ver);
+}
+```
+
+​	第五位IE，版本号位于“MSIE"的后面，分号之前
+
+```javascript
+var ua = navigator.userAgent;
+
+if (window.opera) {
+  engine.ver = window.opera.version();
+  engine.opera = parseFloat(engine.ver);
+} else if (/AppleWebKit\/(\S+)/.test(ua)){
+  engint.ver = RegExp.$1;
+  engine.webkit = parseFloat(engine.ver);
+} else if (/KHTML\/(\S+)/.test(ua) || /Konqueror\/([^;]+)/.test(ua)) {
+  engine.ver = RegExp.$1;
+  engine.khtml = parseFloat(engine.ver);
+} else if (/rv:([^\)]+)\) Gecko\/\d(8)/.test(ua)) {	//  rv:24.0) Gecko/20100101
+  engine.ver = RegExp.$1;
+  engine.gecko = parseFloat(engine.ver);
+} else if (/MSIE ([^;]+)/.test(ua)){	//MSIE 10.0;
+  engine.ver = RegExp.$1;
+  engine.gecko = parseFloat(engine.ver);
+}
+```
+
+#### 识别浏览器和平台
+
+```javascript
+var client = function() {
+  var engint = {
+    ie: 0,
+    gecko: 0,
+    webkit: 0,
+    khtml: 0,
+    opera: 0,
+    
+    ver: null
+  };
+  
+  var brower = {
+    ie: 0,
+    firefox: 0,
+    chrome: 0,
+    safari: 0,
+    opera: 0,
+    knoq: 0,
+    
+    ver: null
+  };
+  
+  var system = {
+  	win： false,
+    mac: false,
+    xll: false
+  };
+  
+  //在此检测呈现引擎/设备
+  return {
+    engine: engine,
+    brower: brower
+  };
+}();
+```
+
+```javascript
+var ua = navigator.userAgent;
+
+if (window.opera) {
+  engine.ver = brower.ver = window.opera.version();
+  engine.opera = brower.opera = parseFloat(engine.ver);
+} else if (/AppleWebKit\/(\S+)/.test(ua)){
+  engint.ver = RegExp.$1;
+  engine.webkit = parseFloat(engine.ver);
+  
+  if (/Chrome\/(\S+)/.test(ua)) {
+    brower.ver = RegExp.$1;
+    brower.chrome = parseFloat(brower.ver);
+  } else if (/Version\/(\S+)/.test(ua)) {
+    brower.ver = RegExp.$1;
+    brower.safari = parseFloat(brower.ver);
+  }
+} else if (/KHTML\/(\S+)/.test(ua) || /Konqueror\/([^;]+)/.test(ua)) {
+  engine.ver = brower.ver = RegExp.$1;
+  engine.khtml = brower.konq = parseFloat(engine.ver);
+} else if (/rv:([^\)]+)\) Gecko\/\d(8)/.test(ua)) {	//  rv:24.0) Gecko/20100101
+  engine.ver = RegExp.$1;
+  engine.gecko = parseFloat(engine.ver);
+  
+  if (/Firefox\/(\S+)/.test(ua)){
+    brower.ver = RegExp.$1;
+    brower.firefox = parseFloat(brower.ver);
+  }
+} else if (/MSIE ([^;]+)/.test(ua)){	//MSIE 10.0;
+  engine.ver = brower.ver = RegExp.$1;
+  engine.gecko = brower.ie = parseFloat(engine.ver);
+}
+
+var p = navigator.platform;
+system.win = p.indexOf("win") == 0;
+system.mac = p.indexOf("Mac") == 0;
+system.xll = (p.indexOf("Xll") == 0) || (p.indexOf("Linux") == 0);
+```
+
 ## Dom操作
 
-### 创建DOM
+​	DOM是针对HTML和XML文档的一个API。DOM描绘了一个层次化的节点数，允许开发人员添加、删除、修改页面的某一部分。
+
+​	有12种类型的节点：
+
+### Node类型
+
+​	（1：element，3：text）。
+
+​	IE没有公开Node类型的构造函数，因此Node.Element_NODE无效。确定一个元素是什么节点类型使用someNode.nodeType == 1(或2,3....)。
+
+将nodeList转为数组
+
+```javascript
+function convertToArray(nodes) {
+  var array = null;
+  try {
+    array = Array.prototype.slice.call(nodes, 0);//非IE
+  } catch (ex) {
+    //IE8之前NodeList实现为一个COM对象
+    array = new Array();
+    //所有浏览器都适用
+    for (var i=0; i<nodes.length; i++) {
+      array.push(nodes[i]);
+    }
+  }
+  return array;
+}
+```
+
+#### 节点关系
+
+previousSibling	nextSibling
+
+1.hasChildNodes()
+
+2.ownerDodument 每个节点都有的属性，指向节点所在的文档节点
+
+#### 创建DOM
 
 ```javascript
 var haskell = document.createElement('p');
@@ -12,11 +367,13 @@ haskell.innerText = 'Haskell';
 var d = document.createElement('style');
 d.setAttribute('type', 'text/css');
 d.innerHTML = 'p { color: red }';
+IE中支持，其他不支持
+var c = document.createElement('<div id="container">container</div>');
 ```
 
-### 更新DOM
+#### 更新DOM
 
-#### 修改内容
+##### 修改内容
 
 1.innerHTML：如果写入的字符串是通过网络拿到了，要注意对字符编码来避免XSS攻击。
 
@@ -31,7 +388,7 @@ p.innerText = '<script>alert("Hi")</script>';
 // HTML被自动编码，无法设置一个<script>节点:
 // <p id="p-id">&lt;script&gt;alert("Hi")&lt;/script&gt;</p>
 ```
-#### 修改css：
+##### 修改css：
 
 DOM节点的`style`属性对应所有的CSS，可以直接获取或设置。因为CSS允许`font-size`这样的名称，但它并非JavaScript有效的属性名，所以需要在JavaScript中改写为驼峰式命名`fontSize`
 
@@ -41,21 +398,256 @@ p.style.fontSize = '20px';
 p.style.paddingTop = '2em';
 ```
 
-### 插入DOM
+#### 插入DOM
 
 appendChild：把一个子节点添加到父节点的最后一个子节点。
 
-​	因为我们插入的`js`节点已经存在于当前的文档树，因此这个节点首先会从原先的位置删除，再插入到新的位置。
+​	因为我们插入的`js`节点已经存在于当前的文档树，因此这个节点首先会从原先的位置删除，再插入到新的位置。childnodes的新增节点、父节点以及以前的最后一个子节点的关系指针都会相应得到更新。更新完成后，appendChild返回新增的节点。
 
 insertBefore：parentElement.insertBefore(newElement, referenceElement);
 
-### 删除DOM
+#### 替换DOM
 
-removeChild
+replaceChild：返回被替换的节点
 
-删除后的节点虽然不在文档树中了，但其实它还在内存中，可以随时再次被添加到别的位置。
+#### 删除DOM
+
+removeChild：返回被移除的节点
+
+删除或替换后的节点虽然不在文档树中了，但其实它还在内存中，可以随时再次被添加到别的位置。
 
 Act：children属性是一个只读属性，并且它在子节点变化时会实时更新。
+
+#### cloneDOM
+
+​	cloneNode(boolean)：true：深复制，连同子节点一块复制；false：只复制节点本身。复制后返回的节点副本属于文档所有，但并没有为它指定父节点。
+
+#### normalize
+
+​	空文本节点删除；相邻文本节点合并
+
+### Document类型
+
+#### 1.文档子节点
+
+​	子节点是：DocumentType(<!DOCTYPE>)、Element、ProcessingInstructor或Comment
+
+​	document对象是HTMLDocument(继承自Document类型)的一个实例，表示整个HTML页面或其他基于XML的文档。
+
+```html
+document
+	html	
+		body
+```
+
+documentElement属性指向html元素
+
+body指向body
+
+doctype：指向<!DOCTYPE>
+
+#### 2.文档信息
+
+title：文档信息
+
+网页请求相关：
+
+​	url：页面完整url、domain：页面域名、referer：链接到当前页面的那个页面的rul。所有这些信息保存在请求的HTTP头部。
+
+​	不能将domain设置为url中不包含的域：比如原域名wrox.com，不能替换成baidu.com
+
+#### 3.查找元素
+
+getElementById、getElementsByTagName、getElementsByName
+
+#### 4.特殊集合
+
+这些集合都是HTMLCollection对象
+
+document.anchors：包含文档中所有带name特性的a元素
+
+document.forms：form元素
+
+document.images：img元素
+
+document.links：所有带href特性的a元素
+
+4.文档写入
+
+write原样写入、writeln字符串末尾添加换行符
+
+open、close用于打开和关闭网页的输出流
+
+### Element类型
+
+#### 1.html元素
+
+html 中标签名始终都已全部大写表示，在XML中标签名始终与源代码保持一致
+
+className：关联了新样式、立即展现
+
+id、lang修改对用户是透明不可见
+
+dir（ltr、rtl）：修改会立即展现
+
+title：修改后只会在鼠标移动到这个上面才回展现
+
+#### 2.取得特性
+
+getAttribute/取自定义特性返回null
+
+setAttribute/通过dom设置自定义属性值不管用
+
+removeAttribute
+
+​	HTMLElement有5个属性与相应特性一一对应，可通过dom直接访问：id、class、name、align、title
+
+​	getAttribute("style")返回style中包含的css文本，div.style返回一个对象
+
+​	getAttribute("onclick")返回代码字符串，div.onclick返回一个js函数，如果没有返回null
+
+#### 3.attributes属性
+
+getNamedItem(name)、removeNamedItem(name)、setNamedItem(name)、item(pos)
+
+nodeName特姓名   nodeValue特性值
+
+var id = element.attributes.getNamedItem("id").nodeValue;
+
+var id = element.attributes["id"].nodeValue;
+
+### Text类型
+
+可通过nodeValue或data属性访问text节点中包含的文本。
+
+appendData
+
+deleteData(offset, count)
+
+insertData(offset, text)
+
+replaceData(offset, count, text)
+
+splitText(offset)从offset指定位置将当前文本节点分成两个文本节点，之前是一截，本身+之后是一截
+
+substringData(offset, count)：提取从offset指定位置开始到offset+count为止处的字符串
+
+length
+
+createTextNode
+
+### comment类型
+
+### CDATASection类型
+
+### DocumentType类型
+
+### DocumentFragment
+
+​	是一种轻量级的文档，可以包含和控制节点，但不会像完整的文档那样占用额外资源。可将它作为一个仓库来使用，在里面保存将来可能会添加到文档中的节点。它集成了Node的所有方法，如果将文档中的节点添加到文档片段中，就会从文档树中移除该节点。
+
+document.createDocumentFragment()
+
+### Attr类型
+
+var attr = document.createAttribute("align");
+
+attr.value = "left";
+
+## DOM操作技术
+
+### IE动态操作dom
+
+IE当中不允许访问script/style的子节点
+
+```javascript
+var node = "function say(){alert('hello')}";
+var script = document.createElement("script");
+try {
+	script.appendChild(document.createTextNode(node));
+} catch (ex){
+  script.text = node;//IE支持
+}
+document.body.appentChild(script);                                                                                        
+```
+
+```javascript
+var style = document.createElement("style");
+style.type = "text/css";
+try {
+	style.appendChild(document.createTextNode("{body:{background:red}"));
+} catch (ex){
+  style.styleSheet.cssText = "{body:{background:red}";//IE支持
+}
+var head = document.getElementsByTagName("head")[0];
+head.appentChild(style);       
+```
+
+​	注：在重用同一个style元素并再次设置styleSheet.cssText，有可能会导致浏览器崩溃。将styleSheet.cssText设置为空字符串，也可能导致浏览器崩溃。
+
+### NodeList
+
+动态实时更新
+
+NodeList
+
+NamedNodeMap
+
+HTMLCollection
+
+```javascript
+var div = document.getElementsByTagName("div");  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ​	单线程执行模式：在JavaScript中，浏览器的JavaScript执行引擎在执行JavaScript代码时，总是以单线程模式执行，也就是说，任何时候，JavaScript代码都不可能同时有多于1个线程在执行。在JavaScript中，执行多任务实际上都是异步调用
 

@@ -19,15 +19,9 @@ IE5引入，使用doctype切换,文档开头没标明，默认开启混杂模式
 
 混杂模式：让IE的行为（包含非标准特性）与IE5相同
 
-标
+标准模式：让IE的行为更接近标准行为  严格型strict.dtd/html5
 
-```
-
-```
-
-准模式：让IE的行为更接近标准行为  严格型strict.dtd/html5
-
-IE之后又提出了准标准模式，这种模式下浏览器特性很多都是符合标准的，不标准的地方主要提现在处理图片间隙的时候，表格中体现最为明显。过渡性loose.dtd/transition.dtd,框架集型：frameset.dtd
+​	IE之后又提出了准标准模式，这种模式下浏览器特性很多都是符合标准的，不标准的地方主要提现在处理图片间隙的时候，表格中体现最为明显。过渡性loose.dtd/transition.dtd,框架集型：frameset.dtd
 
 # noscript
 
@@ -346,7 +340,45 @@ Math.floor(Math.random()*可能值总数 + 第一个可能值)
 2到10  Math.floor(Math.random()*9 + 2）
 ```
 
-# 闭包
+# 第7章 函数表达式
+
+1.函数声明：重要特征是函数声明提升，执行代码之前先读取函数声明
+
+## 递归
+
+```javascript
+阶乘
+function factoria(n) {
+  if (n<=1) {
+    return 1;
+  } else {
+    return n*factoria(n-1);
+  }
+}
+
+var b = factoria(n)会出问题
+
+arguments.callee严格模式下不管用
+function factoria(n) {
+  if (n<=1) {
+    return 1;
+  } else {
+    return n*arguments.callee(n-1);
+  }
+}
+
+var factoria = (function f(n) {
+  if (n<=1) {
+    return 1;
+  } else {
+    return n*f(n-1);
+  }
+});
+```
+
+## 闭包
+
+指有权访问另一个函数作用域中变量的函数
 
 参考文档：http://www.ruanyifeng.com/blog/2009/08/learning_javascript_closures.html
 
@@ -370,7 +402,105 @@ nAdd();
 result(); // 1000
 ```
 
-在一个函数内部定义的全局变量，如果函数没执行，内存当中就不存在相应的全局变量，所以在外边直接调用函数内部当中的全局变量是不管用的。如：直接调用nAdd()是不行的，因为内存当中没有，f1();nAdd();是可以的，先执行f1，在内存中添加aAdd，在window对象上创建window.nAdd = fun;，实际就是在window对象上添加一个属性，使得可以在任何地方访问
+​	在一个函数内部定义的全局变量，如果函数没执行，内存当中就不存在相应的全局变量，所以在外边直接调用函数内部当中的全局变量是不管用的。如：直接调用nAdd()是不行的，因为内存当中没有，f1();nAdd();是可以的，先执行f1，在内存中添加aAdd，在window对象上创建window.nAdd = fun;，实际就是在window对象上添加一个属性，使得可以在任何地方访问
+
+​	闭包会引用包含函数的整个活动对象。
+
+## 模块级作用域
+
+```javascript
+function outNumber(count){
+  for (var i=0; i<count; i++) {
+    alert(i);
+  }
+  var i;
+  alert(i);//因为没有块级作用域，即使重新声明变量，js也会忽略这个声明
+}
+匿名函数
+第一个括号内是函数表达式，函数表达式后面可以跟圆括号
+在匿名函数当中定义的任何变量，都会在执行结束时被销毁。这种技术经常在全局作用域中被用在函数外部，从而限制向全局作用域中添加过多的变量和函数。
+匿名函数也是一个闭包
+（function(){
+ 
+})()
+
+这是错误的
+function(){
+  
+}() js将function关键字当一个函数声明开始，而函数声明不能跟圆括号
+```
+
+## 静态私有变量
+
+在私有作用域中定义私有变量或函数
+
+```javascript
+（function(){
+  //私有作用域
+  //私有变量
+  var name = "";
+  //全局函数表达式
+  Person = function(val) {
+    name = value;
+  };
+  Person.prototype.getName = function() {
+    return name;
+  }
+})()
+```
+
+闭包和私有变量缺点：多查找作用域连中的一个层次，就会在一定程度上影响查找速度。
+
+## 模块模式
+
+参考课本190页
+
+单例：只有一个实例的对象。js以对象字面量的方式来创建单例对象
+
+模块模式通过为单例添加私有变量和特权方法能够使其得到增强,
+
+​	这个对象字面量定义的是单例的公共接口。这种模式在需要对单例进行某些初始化是，同时又要维护其私有变量时是非常有用的。
+
+​	在web应用中，经常需要一个单例来管理应用程序级的信息。
+
+```javascript
+var singleton = function(){
+  var privateVar = 10;
+  function privateFun(){
+    return false;
+  }
+  return {
+    publicProperty: true,
+    publicMethod: function(){
+      privateVar++;
+      return privateFun();
+    }
+  }
+}(); 
+```
+
+## 增强的模块模式
+
+```javascript
+var application = function() {
+  var components = new Array();
+  components.push(new BaseComponent());
+  
+  var app = new BaseComponent();
+  //公共接口
+  app.getComponentCount = function(){
+    return components.length;
+  };
+  
+  app.registerComponent = function(component){
+    if (typeOf component == "object"){
+      components.push(component);
+    }
+  }
+  
+  return app;
+}
+```
 
 # 垃圾回收机制
 
